@@ -37,9 +37,24 @@ export async function createTask(req: AuthRequest, res: Response) {
 export async function getAllTasks(req: AuthRequest, res: Response) {
   const { page = 1, limit = 10 } = req.query;
   const { userId } = req;
+  const { title, status, priority } = req.query;
 
   try {
-    const tasks = await Task.find({ userId, isDeleted: false }) // maybe we could add a `select` function, but I feel all fields are useful in the response
+    const filter: FilterQuery<ITask> = { userId, isDeleted: false };
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    if (title) {
+      filter.title = { $regex: title, $options: 'i' };
+    }
+
+    const tasks = await Task.find(filter) // maybe we could add a `select` function, but I feel all fields are useful in the response
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
     return res.status(200).json({ message: 'Tasks fetched', tasks });
@@ -126,44 +141,6 @@ export async function deleteTask(req: AuthRequest, res: Response) {
     }
 
     return res.json({ message: 'Task deleted' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Server error', error });
-  }
-}
-
-export async function searchTasks(req: AuthRequest, res: Response) {
-  const { title } = req.query;
-  const { userId } = req;
-
-  try {
-    const tasks = await Task.find({
-      userId,
-      title: { $regex: title, $options: 'i' },
-      isDeleted: false
-    });
-
-    return res.json({ message: 'Tasks fetched', tasks });
-  } catch (error) {
-    return res.status(500).json({ message: 'Server error', error });
-  }
-}
-
-export async function filterTasks(req: AuthRequest, res: Response) {
-  const { status, priority } = req.query;
-  const { userId } = req;
-
-  try {
-    const filter: FilterQuery<ITask> = { userId };
-    if (status) {
-      filter.status = status;
-    }
-    if (priority) {
-      filter.priority = priority;
-    }
-
-    const tasks = await Task.find(filter);
-
-    return res.json({ message: 'Tasks fetched', tasks });
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error });
   }
