@@ -35,9 +35,8 @@ export async function createTask(req: AuthRequest, res: Response) {
 }
 
 export async function getAllTasks(req: AuthRequest, res: Response) {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, title, status, priority } = req.query;
   const { userId } = req;
-  const { title, status, priority } = req.query;
 
   try {
     const filter: FilterQuery<ITask> = { userId, isDeleted: false };
@@ -55,6 +54,7 @@ export async function getAllTasks(req: AuthRequest, res: Response) {
     }
 
     const tasks = await Task.find(filter) // maybe we could add a `select` function, but I feel all fields are useful in the response
+      .sort('-createdAt')
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit));
     return res.status(200).json({ message: 'Tasks fetched', tasks });

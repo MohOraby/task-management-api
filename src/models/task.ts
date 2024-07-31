@@ -30,9 +30,10 @@ const taskSchema = new Schema<ITask>({
   dueDate: { type: Date, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   isDeleted: { type: Boolean, default: false, required: true }
-});
+}, { timestamps: true });
 
 taskSchema.index({ title: 1 });
 taskSchema.index({ userId: 1 });
+taskSchema.index({ createdAt: -1 });
 
 export default mongoose.model<ITask>('Task', taskSchema);
