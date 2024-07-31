@@ -8,16 +8,16 @@ export async function createTask(req: AuthRequest, res: Response) {
   const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId | isDeleted'>;
   const { userId } = req;
 
-  await validateTaskSchema.validateAsync({
-    title,
-    description,
-    status,
-    priority,
-    dueDate,
-    userId
-  });
-
   try {
+    await validateTaskSchema.validateAsync({
+      title,
+      description,
+      status,
+      priority,
+      dueDate,
+      userId
+    });
+
     const newTask = await Task.create({
       title,
       description,
@@ -52,17 +52,17 @@ export async function getTaskById(req: AuthRequest, res: Response) {
   const { taskId } = req.params;
   const { userId } = req;
 
-  await validateTaskIdParam.validateAsync({
-    taskId
-  });
-
   try {
-    const task = await Task.findOne({ message: 'Task fetched', _id: taskId, userId, isDeleted: false });
+    await validateTaskIdParam.validateAsync({
+      taskId
+    });
+
+    const task = await Task.findOne({ _id: taskId, userId, isDeleted: false });
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    return res.json({ task });
+    return res.json({ message: 'Task fetched', task });
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error });
   }
@@ -73,21 +73,21 @@ export async function updateTask(req: AuthRequest, res: Response) {
   const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId | isDeleted'>;
   const { userId } = req;
 
-  await Promise.all([
-    validateTaskSchema.validateAsync({
-      title,
-      description,
-      status,
-      priority,
-      dueDate,
-      userId
-    }),
-    validateTaskIdParam.validateAsync({
-      taskId
-    })
-  ]);
-
   try {
+    await Promise.all([
+      validateTaskSchema.validateAsync({
+        title,
+        description,
+        status,
+        priority,
+        dueDate,
+        userId
+      }),
+      validateTaskIdParam.validateAsync({
+        taskId
+      })
+    ]);
+
     const { matchedCount, modifiedCount } = await Task.updateOne(
       { _id: taskId, userId, isDeleted: false },
       { title, description, status, priority, dueDate }
@@ -111,11 +111,11 @@ export async function deleteTask(req: AuthRequest, res: Response) {
   const { taskId } = req.params;
   const { userId } = req;
 
-  await validateTaskIdParam.validateAsync({
-    taskId
-  });
-
   try {
+    await validateTaskIdParam.validateAsync({
+      taskId
+    });
+
     const { matchedCount, modifiedCount } = await Task.updateOne({ _id: taskId, userId, isDeleted: false }, { isDeleted: true });
     if (!matchedCount) {
       return res.status(404).json({ message: 'Task not found' });
@@ -127,7 +127,7 @@ export async function deleteTask(req: AuthRequest, res: Response) {
 
     return res.json({ message: 'Task deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    return res.status(500).json({ message: 'Server error', error });
   }
 }
 
@@ -144,7 +144,7 @@ export async function searchTasks(req: AuthRequest, res: Response) {
 
     return res.json({ message: 'Tasks fetched', tasks });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    return res.status(500).json({ message: 'Server error', error });
   }
 }
 

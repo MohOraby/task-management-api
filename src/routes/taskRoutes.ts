@@ -13,11 +13,11 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 // eslint-disable-next-line new-cap
 const router = express.Router();
 
-router.post('/', authMiddleware, createTask);
-router.get('/', authMiddleware, getAllTasks);
-router.get('/:taskId', authMiddleware, getTaskById);
-router.put('/:taskId', authMiddleware, updateTask);
-router.delete('/:taskId', authMiddleware, deleteTask);
+router.post('/create', authMiddleware, createTask);
+router.get('/list', authMiddleware, getAllTasks);
+router.get('/:taskId/view', authMiddleware, getTaskById);
+router.put('/:taskId/update', authMiddleware, updateTask);
+router.delete('/:taskId/delete', authMiddleware, deleteTask);
 router.get('/search', authMiddleware, searchTasks);
 router.get('/filter', authMiddleware, filterTasks);
 
