@@ -16,11 +16,6 @@ initializeConnection().catch(err => {
 app.use('/auth', authRoutes);
 app.use('/tasks', taskRoutes);
 
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  return res.status(500).send('Something went wrong!');
-});
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

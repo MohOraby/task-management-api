@@ -5,7 +5,7 @@ import { FilterQuery } from 'mongoose';
 import { validateTaskIdParam, validateTaskSchema } from '../utils/taskValidation';
 
 export async function createTask(req: AuthRequest, res: Response) {
-  const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId'>;
+  const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId | isDeleted'>;
   const { userId } = req;
 
   await validateTaskSchema.validateAsync({
@@ -24,7 +24,8 @@ export async function createTask(req: AuthRequest, res: Response) {
       status,
       priority,
       dueDate,
-      userId
+      userId,
+      isDeleted: false
     });
 
     return res.status(201).json({ message: 'Task created', taskId: newTask._id });
@@ -69,7 +70,7 @@ export async function getTaskById(req: AuthRequest, res: Response) {
 
 export async function updateTask(req: AuthRequest, res: Response) {
   const { taskId } = req.params;
-  const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId'>;
+  const { title, description, status, priority, dueDate } = req.body as unknown as Omit<ITask, 'userId | isDeleted'>;
   const { userId } = req;
 
   await Promise.all([
